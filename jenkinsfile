@@ -1,11 +1,13 @@
 pipeline {
-    agent any
+    agent {label 'frontend'}
+    environment {
+        APP_SERVER = "172.31.47.210"
+        DEPLOY_DIR =  "var/www/html"
+    }
     stages{
         stage ('pre build actions'){
             steps {
                 sh 'npm install'
-                sh 'sudo systemctl status nginx || sudo apt install nginx -y'
-                sh 'sudo systemctl start nginx'
            }
         }
         stage ('build'){
@@ -16,9 +18,14 @@ pipeline {
         }
         stage ('post build actions'){
             steps {
-                sh 'echo "Build Completed Successfully"'
-                sh 'sudo cp -r dist/* /var/www/html/'
-                sh 'sudo systemctl restart nginx'
+                sh """
+                echo 'cleaning old files on app server'
+                ssh jenkins@${APP_SERVER} 'rm -rf ${DEPLOY_DIR}/*'
+                echo 'Copying frontend build'
+                scp -r dist/* jenkins@${APP_SERVER}:${DEPLOY_DIR}/
+                echo 'Restarting nginx'
+                ssh jenkins@${APP_SERVER} 'sudo systemctl restart nginx'
+                """
             }
         }
     }
