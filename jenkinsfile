@@ -1,32 +1,74 @@
 pipeline {
-    agent {label 'frontend'}
+    agent any
     environment {
-        APP_SERVER = "172.31.47.210"
-        DEPLOY_DIR =  "/var/www/html"
+        IMAGE_NAME = "omkarnangare/frontend:latest"
+        IMAGE_TAG = "${BUILDER_NUMBER}"
+        APP_SERVER = "184.73.12.228"
     }
     stages{
-        stage ('pre build actions'){
+        stage ('Checkout'){
             steps {
-                sh 'npm install'
+                git branch: 'main',
+                url: 'https://github.com/nangareo/jenkins-webapp.git'
            }
         }
-        stage ('build'){
+        stage ('Build Docker Image'){
             steps {
-               sh 'npm run build'
+               sh ''''
+               docker build -f docker/dockerfile -t $IMAGE_NAME:$IMAGE_TAG .
+               '''
             }
-
         }
-        stage ('post build actions'){
+        stage ('Docker Login'){
             steps {
-                sh """
-                echo 'cleaning old files on app server'
-                ssh jenkins@${APP_SERVER} 'rm -rf ${DEPLOY_DIR}/*'
-                echo 'Copying frontend build'
-                scp -r dist/* jenkins@${APP_SERVER}:${DEPLOY_DIR}/
-                echo 'Restarting nginx'
-                ssh jenkins@${APP_SERVER} 'sudo systemctl restart nginx'
-                """
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'DockerCred',
+                        usernameVariable: 'DOCKER_USER'
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh ''''
+                    echo $DOCKER_PASS | docker login \
+                    -u $DOCKER_USER \
+                    --password-stdin
+                    ''''
+                }
+            }
+        }
+        stage('Push Image') {
+            steps {
+                sh ''''
+                docker push $IMAGE_NAME:$IMAGE_TAG
+                docker tag \
+                $IMAGE_NAME:$IMAGE_TAG \
+                $IMAGE_NAME:latest
+                docker push $IMAGE_NAME:latest
+            }
+        }
+        stage('Deploy To App Server') {
+            steps {
+                sh '''''
+                ssh ubuntu@APP_SERVER '
+                docker pull $IMAGE_NAME:latest
+                docker stop frontend || true
+                docker rm frontend || true
+                docker run -d \
+                --name frontend \
+                -p 80:80
+                $IMAGE_NAME:latest
+                '
+                '''''
+            }
+        }    
+    }
+    post {
+        success {
+            echo "Deployment Successful"
+            }
+            failure {
+                echo "Deployment Failed"}
+                
             }
         }
     }
-}
