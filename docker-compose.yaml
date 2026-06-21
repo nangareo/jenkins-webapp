@@ -1,3 +1,4 @@
+version: '3.8'
 
 services:
   mysql:
@@ -11,21 +12,24 @@ services:
       MYSQL_PASSWORD: gopal123
     volumes:
       - mysql-data:/var/lib/mysql
+
   backend:
-    image: backend:v1
+    image: omkarnangare/backend:v1
     container_name: backend
     restart: always
     depends_on:
       - mysql
     ports:
       - "8080:8080"
+
   frontend:
-    image: frontend:v1
+    image: omkarnangare/frontend:v1
     container_name: frontend
     restart: always
     depends_on:
       - backend
     ports:
       - "80:80"
+
 volumes:
   mysql-data:
