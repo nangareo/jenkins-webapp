@@ -3,11 +3,14 @@ pipeline{
     stages{
         stage('Deployment'){
             steps{
+                sh """
+                scp docker-compose.yaml ubuntu@13.126.6.143:/home/ubuntu/
                 ssh ubuntu@13.207.186.76 '''
-                copy docker-compose.yaml /home/ubuntu/docker-compose.yaml
-                docker-compose -f /home/ubuntu/docker-compose.yaml down
-                docker-compose -f /home/ubuntu/docker-compose.yaml up -d
+                cd /home/ubuntu
+                docker-compose down
+                docker-compose up -d
                 '''
+                """
             }
         }
     }
