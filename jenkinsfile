@@ -6,8 +6,8 @@ pipeline{
         REPOSITORY = 'frontend'
         IMAGE_TAG = '${BUILDER_NUMBER}'
         ECR_URI = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPOSITORY}:${IMAGE_TAG}"
-        ACCESS_KEY_ID = $ACCESS_KEY_ID
-        SECRET_ACCESS_KEY = $SECRET_ACCESS_KEY
+        ACCESS_KEY_ID = credentials('ACCESS_KEY_ID')
+        SECRET_ACCESS_KEY = credentials('SECRET_ACCESS_KEY')
         CLUSTER_NAME = 'default'
         SERVICE_NAME = 'frontend-1c35'
     }
@@ -27,7 +27,10 @@ pipeline{
         stage('Login to AWS ECR'){
             steps{
                 sh """
-                aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                aws ecr get-login-password \
+                --region ${AWS_REGION} | docker login \
+                --username AWS \
+                --password-stdin ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
                 """
             }
         }
