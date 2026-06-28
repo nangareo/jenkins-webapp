@@ -6,7 +6,7 @@ pipeline{
     ACCOUNT_ID = '526002960065'
     REPOSITORY = 'frontend'
     IMAGE_TAG = "${BUILD_NUMBER}"
-    ECR_URI = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPOSITORY}:${IMAGE_TAG}"
+    ECR_URI = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPOSITORY}"
     CLUSTER_NAME = 'default'
     SERVICE_NAME = 'frontend-1c35'
 }
