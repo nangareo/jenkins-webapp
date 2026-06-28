@@ -9,8 +9,7 @@ pipeline{
     ECR_URI = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPOSITORY}"
     CLUSTER_NAME = 'default'
     SERVICE_NAME = 'frontend-1c35'
-}
-
+    }
     stages{
         stage('Checkout'){
             steps{
