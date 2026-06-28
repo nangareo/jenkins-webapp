@@ -1,6 +1,6 @@
 pipeline{
     agent any
-    
+
     environment {
     AWS_REGION = 'ap-south-1'
     ACCOUNT_ID = '526002960065'
@@ -10,7 +10,7 @@ pipeline{
     CLUSTER_NAME = 'default'
     SERVICE_NAME = 'frontend-1c35'
 }
-    }
+
     stages{
         stage('Checkout'){
             steps{
@@ -84,4 +84,3 @@ pipeline{
             cleanWs()
         }
     }
-}
